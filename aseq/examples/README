@@ -1,0 +1,79 @@
+Here we provide a data test set. 
+We assume `example' to be current directory and ASEQ executable to be in the current directory (in Windows substitute `/' with `\').
+
+Content:
+ - PILEUP
+ - GENOTYPE
+ - ASE
+ - ASE pipeline
+ 
+PILEUP
+======
+
+To run the pileup for a single VCF and a single BAM file use the following command:
+
+./ASEQ vcf=./VCF_samples/sample1.vcf bam=./BAM_samples/sample1.bam threads=1 mbq=20 mrq=1 mdc=5 out=./Results
+
+To run multiple pileups use the following command:
+
+./ASEQ vcflist=vcf.list bamlist=bam.list threads=1 mbq=20 mrq=1 mdc=5 out=./Results
+
+Note that we always require one VCF per BAM; hence each position entry in the vcf.list corresponds to the corrresponding position entry in the bam.list.
+Files *.PILEUP.ASEQ will be generated, each containing the read counts for the input SNPs from the VCF file(s).
+
+GENOTYPE
+========
+
+To run genotype calls for a single VCF and a single BAM file use the following command:
+
+./ASEQ vcf=./VCF_samples/sample1.vcf bam=./BAM_samples/sample1.bam mode=GENOTYPE threads=1 mbq=20 mrq=1 mdc=5 htperc=0.2 out=./Results
+
+To run genotype calls for multiple files use the following command:
+
+./ASEQ vcf=./VCF_samples/sample1.vcf bamlist=bam.list mode=GENOTYPE threads=1 mbq=20 mrq=1 mdc=5 htperc=0.2 out=./Results
+
+Files *.GENOTYPE.ASEQ will be generated, each containing the read counts for the input SNPs from the VCF file(s).
+Files *.heterozygous.vcf will be generated, each containing the heterozygous SNPs.
+Files *.genotype.vcf will be generated, each containing the SNPs genotype calls.
+
+More information about output files format can be found in the ASEQ Manual.
+
+ASE
+===
+
+Tu run an ASE analysis use the following command:
+
+./ASEQ vcflist=vcf.list bamlist=bam.list genes=genes.bed mode=ASE threads=1 mbq=20 mrq=1 pht=0.01 pft=0.01 out=./Results
+
+or 
+
+./ASEQ vcflist=vcf.list bamlist=bam.list transcripts=transcripts.interval mode=ASE threads=1 mbq=20 mrq=1 pht=0.01 pft=0.01 out=./Results
+
+
+Files *.ASE.ASEQ will be generated, containing read counts for the input SNPs.
+In addition the following files will be created:
+
+- ASE_genes.csv = List of genes showing ASE with ASE calculation results and number of samples available for ASE calculation; 
+- genes_statistics.csv = Detailed view of ASE calculation with ASE value of all the samples for all the ASE genes;
+- snps_per_gene.csv = Table containing the number of hitting SNPs for all genes in all the samples.
+
+More information about output files format can be found in the ASEQ Manual.
+
+
+ASE pipeline
+============
+
+the typical ASEQ pipeline for ASE analysis is executed by performing sequentially the following steps:
+
+1) Create list dnaseq.list with DNAseq BAM files paths for all the samples and download ASEQ-annotation-files.tar.gz to get the list of dbsnp137 SNPs that overlapp UCSC KnownGene hg19 genes;
+
+2) Run command "./ASEQ vcf=dbsnp.137.UCSC.Coding.chrRecoded.vcf bamlist=dnaseq.list mode=GENOTYPE threads=6 mbq=20 mrq=20 mdc=10 htperc=0.2 out=./Genotype" with favorite parameters;
+
+3) Create vcf.list with *.heterozygous.vcf files generated in ./genotype in step 2 and create list rnaseq.list with the corresponding RNAseq BAM files paths for all the samples. 
+Download ASEQ-annotation-files.tar.gz to get gene and transcript input models built using UCSC hg19 KnownGenes files; 
+
+4) Run command "./ASEQ vcflist=vcf.list bamlist=rnaseq.list genes=genes.bed mode=ASE threads=6 mbq=20 mrq=20 mdc=10 pht=0.01 pft=0.01 out=./ASE_analysis" with genes.bed or transcripts.interval files.
+
+
+
+
